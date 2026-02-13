@@ -5,11 +5,17 @@ description: Ensure the "Ralphie protocol" is offered/used in coding projects th
 
 # Ralphie Skill
 
+## What this skill is
+
+- **The skill** is installed into the OpenClaw agent workspace so agents can follow a shared Ralphie protocol.
+- **`ralphie.sh`** is intended to be **copied into whatever target project** (new or existing) you want to run Ralphie on.
+- Ralphie is then run and “babysat” per this skill (background run + monitored logs + prompt liaison).
+
 ## Workflow (do this at the start of any coding engagement)
 
-### 1) Detect whether the repo already has Ralphie
+### 1) Detect whether the target repo already has Ralphie
 
-From the repo root (or current working directory if unknown), scan for `ralphie.sh`.
+From the target project repo root (or current working directory if unknown), scan for `ralphie.sh`.
 
 - Prefer using the bundled script: `scripts/ralphie_scan.sh`.
 - If you do it manually, a safe default is:
@@ -21,19 +27,21 @@ From the repo root (or current working directory if unknown), scan for `ralphie.
 
 **If not found:**
 - Offer the **Ralphie protocol** (see `references/ralphie_protocol.md`).
-- Ask a single confirm question: “Want me to add Ralphie to this repo and run it?”
+- Ask a single confirm question: “Want me to copy/add Ralphie into this project?”
 
-### 2) Offer install/run options (when missing)
+### 2) Add Ralphie to the target project (when missing)
 
-Default to the safer option (download to file, then run) — but keep the user’s preferred one-liner available.
+Default to copying a known file into the project (more controllable than piping remote code).
 
 Options:
-1. **Preferred (safer):** download `ralphie.sh` into the repo, inspect, then run.
+1. **Preferred (copy from this skill repo):** copy `scripts/ralphie.sh` into the target repo as `./ralphie.sh`.
+   - Use `scripts/ralphie_copy.sh --to <project-dir>`
+2. **Download into the project:** fetch upstream into `./ralphie.sh`, then optionally inspect.
    - Use `scripts/ralphie_install.sh` (downloads to `./ralphie.sh` by default).
-2. **User-provided one-liner (fast, less safe):**
+3. **Fast one-liner (user may explicitly choose, less safe):**
    - `curl -fsSL https://raw.githubusercontent.com/sirouk/ralphie/refs/heads/master/ralphie.sh | bash`
 
-### 3) Run Ralphie in the background (always)
+### 3) Run Ralphie in the background (when running)
 
 When running `ralphie.sh`, do not block the main agent.
 
@@ -66,14 +74,30 @@ If sub-agents are unavailable in the environment, fall back to:
 
 ## What to report back to the user
 
-- Whether `ralphie.sh` was found or installed
+- Whether `ralphie.sh` was found / copied / downloaded
 - Where logs are (`.ralphie/ralphie.log`)
 - Key findings and concrete recommended actions
+
+## Secrets / tokens (white gloves)
+
+When Ralphie (or its optional Chutes/Codex/Claude setup) needs tokens:
+- Do **not** paste secrets into git repos.
+- Prefer OpenClaw’s env/secrets patterns on the *host running OpenClaw*:
+  - `~/.openclaw/.env` (global)
+  - per-process env vars
+  - or config inline `env: { ... }` via `openclaw config set`
+
+Examples:
+- `openclaw config set env.CHUTES_API_KEY '"cpk_..."' --json`
+- `openclaw config set env.OPENAI_API_KEY '"sk-..."' --json`
+
+If Codex auth is OAuth-based in your OpenClaw setup, prefer the OpenClaw CLI login flow on the machine that will run Ralphie/OpenClaw.
 
 ## Resources
 
 - `scripts/ralphie_scan.sh` — detect `ralphie.sh`
-- `scripts/ralphie_install.sh` — download `ralphie.sh` into the repo
+- `scripts/ralphie_copy.sh` — copy vendored `ralphie.sh` into a target project + best-effort run tracking
+- `scripts/ralphie_install.sh` — download `ralphie.sh` into a target project
 - `scripts/ralphie_run_bg.sh` — run `ralphie.sh` in background with pid+log
 - `scripts/ralphie.sh` — **vendored upstream copy** (large) for inspection/reference; upstream URL is still the source of truth
 - `scripts/bootstrap_openclaw.sh` — install this skill repo into an OpenClaw skills directory (symlink/copy)
