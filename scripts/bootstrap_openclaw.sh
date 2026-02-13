@@ -168,9 +168,16 @@ verify_openclaw_sees_skill() {
 
   # Best-effort: ensure the skill shows up in OpenClaw's indexed skills.
   # This does NOT guarantee it will trigger on a given prompt, but it confirms discovery.
-  if openclaw skills list 2>/dev/null | rg -q "^${SKILL_NAME}\b"; then
-    log_ok "Verified: openclaw skills list contains ${SKILL_NAME}"
-    return 0
+  if command -v rg >/dev/null 2>&1; then
+    if openclaw skills list 2>/dev/null | rg -q "^${SKILL_NAME}\\b"; then
+      log_ok "Verified: openclaw skills list contains ${SKILL_NAME}"
+      return 0
+    fi
+  else
+    if openclaw skills list 2>/dev/null | grep -Eq "^${SKILL_NAME}([[:space:]]|$)"; then
+      log_ok "Verified: openclaw skills list contains ${SKILL_NAME}"
+      return 0
+    fi
   fi
 
   log_warn "Could not confirm ${SKILL_NAME} via: openclaw skills list"
