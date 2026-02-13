@@ -202,7 +202,17 @@ verify_openclaw_sees_skill() {
   return 0
 }
 
+check_concurrency_budget() {
+  if [ -f "$REPO_ROOT/scripts/openclaw_concurrency_check.sh" ]; then
+    if ! bash "$REPO_ROOT/scripts/openclaw_concurrency_check.sh"; then
+      log_warn "Concurrency rail: Ralphie babysitting typically wants 1 extra concurrent agent."
+      log_warn "If you agree, follow the printed command to bump agents.defaults.maxConcurrent."
+    fi
+  fi
+}
+
 verify_openclaw_sees_skill
+check_concurrency_budget
 
 log_ok "Done. Restart/refresh OpenClaw skills if needed."
 log_info "Tip: you can run: openclaw skills list | rg '^ralphie-skill\\b'"
