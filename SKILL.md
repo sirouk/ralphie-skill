@@ -78,6 +78,20 @@ If sub-agents are unavailable in the environment, fall back to:
 - Where logs are (`.ralphie/ralphie.log`)
 - Key findings and concrete recommended actions
 
+## Residual record (rails)
+
+To make Ralphie a true liaison, keep breadcrumbs so you can always get back to a running (or previously-run) Ralphie instance.
+
+Canonical curated log (preferred, for backups):
+- `<workspace>/memory/RALPHIE_MEMORY.md`
+
+Machine-readable event stream (best-effort):
+- `~/.openclaw/skills/ralphie-skill/runs.jsonl`
+
+The bundled helper scripts (e.g. `scripts/ralphie_copy.sh`) will try to append to both.
+
+Multi-agent note: budget **one extra concurrent agent** for the babysitter/liaison if the environment enforces concurrency limits.
+
 ## Secrets / tokens (white gloves)
 
 When Ralphie (or its optional Chutes/Codex/Claude setup) needs tokens:

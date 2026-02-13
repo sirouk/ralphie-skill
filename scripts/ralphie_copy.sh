@@ -63,7 +63,8 @@ chmod +x "$DST" || true
 
 echo "Copied: $SRC -> $DST"
 
-# Best-effort run tracking (local only).
+# Best-effort residual tracking.
+# 1) Event stream (machine-readable)
 STATE_DIR="$HOME/.openclaw/skills/ralphie-skill"
 STATE_FILE="$STATE_DIR/runs.jsonl"
 mkdir -p "$STATE_DIR" 2>/dev/null || true
@@ -82,3 +83,44 @@ rec = {
 with open(out, "a", encoding="utf-8") as f:
   f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 PY
+
+# 2) Curated breadcrumb (human-readable) in the primary agent workspace memory if detectable.
+# We intentionally do not hard-fail if we can’t find it.
+WORKSPACE="${OPENCLAW_WORKSPACE_DIR:-}"
+if [ -z "$WORKSPACE" ]; then
+  cfg="$HOME/.openclaw/openclaw.json"
+  if [ -f "$cfg" ] && command -v python3 >/dev/null 2>&1; then
+    WORKSPACE="$(python3 - "$cfg" <<'PY' 2>/dev/null || true
+import json, sys
+path = sys.argv[1]
+try:
+  with open(path, 'r', encoding='utf-8') as f:
+    data = json.load(f)
+except Exception:
+  sys.exit(0)
+ws = (((data.get('agents') or {}).get('defaults') or {}).get('workspace'))
+if isinstance(ws, str) and ws.strip():
+  print(ws.strip(), end='')
+  sys.exit(0)
+ws = data.get('workspace')
+if isinstance(ws, str) and ws.strip():
+  print(ws.strip(), end='')
+PY
+)"
+  fi
+fi
+
+if [ -n "$WORKSPACE" ] && [ -d "$WORKSPACE/memory" ]; then
+  MEMFILE="$WORKSPACE/memory/RALPHIE_MEMORY.md"
+  ts="$(date '+%Y-%m-%d %H:%M %Z')"
+  {
+    echo ""
+    echo "## $ts — $(basename "$TO") (local)"
+    echo ""
+    echo "- **Project dir:** $(cd "$TO" && pwd)"
+    echo "- **Host:** local"
+    echo "- **How Ralphie was added:** copy"
+    echo "- **ralphie.sh path:** ./ralphie.sh"
+    echo "- **Notes / outcome:** copied via ralphie-skill"
+  } >> "$MEMFILE" 2>/dev/null || true
+fi
