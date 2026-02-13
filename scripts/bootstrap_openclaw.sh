@@ -5,10 +5,14 @@ set -euo pipefail
 # Usage:
 #   bash scripts/bootstrap_openclaw.sh [--copy|--symlink] [--dir <skills-parent>] [--no-color]
 #
-# Installs into ONE of:
-#   - <openclaw-workspace>/skills/
-#   - ~/.openclaw/workspace/skills/
-#   - ~/.openclaw/skills/
+# Installs the skill into an OpenClaw skills directory (so OpenClaw can discover it).
+#
+# Also prints a best-effort recommendation for where the *repo itself* should live:
+# - If the OpenClaw workspace has a `projects/` (or `project/`) convention, prefer:
+#     <workspace>/projects/ralphie-skill
+#   else:
+#     <workspace>/ralphie-skill
+# (This mirrors the placement logic used by projects/clawboard/scripts/bootstrap_openclaw.sh.)
 #
 # Notes:
 # - This repo *is* the skill directory (root contains SKILL.md).
@@ -49,7 +53,8 @@ if [ ! -f "$REPO_ROOT/SKILL.md" ]; then
 fi
 
 INSTALL_MODE="symlink"  # symlink|copy
-TARGET_PARENT=""        # directory that will contain <skill-name>/
+TARGET_PARENT=""        # directory that will contain <skill-name>/ (OpenClaw skills dir)
+RECOMMENDED_REPO_DIR="" # where this repo would ideally live (workspace/projects convention)
 
 usage() {
   cat <<USAGE
@@ -118,16 +123,23 @@ if [ -z "$TARGET_PARENT" ]; then
   ws="${ws//$'\r'/}"
 
   if [ -n "$ws" ] && [ -d "$ws" ]; then
-    if [ -d "$ws/skills" ]; then
-      TARGET_PARENT="$ws/skills"
+    # Skills live under <workspace>/skills
+    TARGET_PARENT="$ws/skills"
+
+    # Repo placement recommendation mirrors Clawboard bootstrap.
+    if [ -d "$ws/projects" ]; then
+      RECOMMENDED_REPO_DIR="$ws/projects/$SKILL_NAME"
+    elif [ -d "$ws/project" ]; then
+      RECOMMENDED_REPO_DIR="$ws/project/$SKILL_NAME"
     else
-      # Common convention if the workspace root exists but skills/ doesn't yet.
-      TARGET_PARENT="$ws/skills"
+      RECOMMENDED_REPO_DIR="$ws/$SKILL_NAME"
     fi
   elif [ -d "$HOME/.openclaw/workspace" ]; then
     TARGET_PARENT="$HOME/.openclaw/workspace/skills"
+    RECOMMENDED_REPO_DIR="$HOME/.openclaw/workspace/projects/$SKILL_NAME"
   else
     TARGET_PARENT="$HOME/.openclaw/skills"
+    RECOMMENDED_REPO_DIR=""
   fi
 fi
 
@@ -138,6 +150,11 @@ log_info "Repo root:      $REPO_ROOT"
 log_info "Install mode:   $INSTALL_MODE"
 log_info "Target parent:  $TARGET_PARENT"
 log_info "Target dir:     $TARGET_DIR"
+
+if [ -n "$RECOMMENDED_REPO_DIR" ] && [ "$REPO_ROOT" != "$RECOMMENDED_REPO_DIR" ]; then
+  log_info "Recommended repo location: $RECOMMENDED_REPO_DIR"
+  log_info "(If you want to mirror OpenClaw's projects convention, move/clone this repo there.)"
+fi
 
 mkdir -p "$TARGET_PARENT"
 
