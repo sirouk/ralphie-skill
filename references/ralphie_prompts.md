@@ -136,6 +136,8 @@ Ralphie may offer:
 - `Run Chutes Codex installer now?` (downloads and runs `https://chutes.ai/chutes_codex_env.sh`)
 - `Run Chutes Claude Code installer now?` (downloads and runs `https://chutes.ai/chutes_claude_code_env.sh`)
 
+White-glove note: if any of these flows require API keys/tokens, prefer setting them via OpenClaw host env/secrets (e.g. `~/.openclaw/.env` or `openclaw config set env.* ...`) rather than pasting them into prompts or committing them to a repo.
+
 Implication: these run remote scripts. They’re convenient but you should treat them like any remote installer.
 
 Safe default:
