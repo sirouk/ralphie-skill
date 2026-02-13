@@ -92,6 +92,17 @@ The bundled helper scripts (e.g. `scripts/ralphie_copy.sh`) will try to append t
 
 Multi-agent note: budget **one extra concurrent agent** for the babysitter/liaison if the environment enforces concurrency limits.
 
+To check this in OpenClaw config, read:
+- `agents.defaults.maxConcurrent` (default: 1)
+
+Command:
+- `openclaw config get agents.defaults.maxConcurrent --json`
+
+If it’s < 2, offer (with confirmation) to bump it to 2:
+- `openclaw config set agents.defaults.maxConcurrent 2 --json`
+
+Bundled helper: `scripts/openclaw_concurrency_check.sh`.
+
 ## Secrets / tokens (white gloves)
 
 When Ralphie (or its optional Chutes/Codex/Claude setup) needs tokens:
