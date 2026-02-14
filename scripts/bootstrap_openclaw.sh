@@ -3,7 +3,8 @@ set -euo pipefail
 
 # Ralphie Skill bootstrap: install this repo as an OpenClaw skill (symlink or copy).
 # Usage:
-#   bash scripts/bootstrap_openclaw.sh [--copy|--symlink] [--dir <skills-parent>] [--no-color]
+#   bash scripts/bootstrap_openclaw.sh [--copy|--symlink] [--dir <skills-parent>]
+#     [--offer-bump-concurrency] [--no-color]
 #
 # Installs the skill into an OpenClaw skills directory (so OpenClaw can discover it).
 #
@@ -55,17 +56,20 @@ fi
 INSTALL_MODE="symlink"  # symlink|copy
 TARGET_PARENT=""        # directory that will contain <skill-name>/ (OpenClaw skills dir)
 RECOMMENDED_REPO_DIR="" # where this repo would ideally live (workspace/projects convention)
+OFFER_BUMP_CONCURRENCY=false
 
 usage() {
   cat <<USAGE
 Usage: bash scripts/bootstrap_openclaw.sh [options]
 
 Options:
-  --symlink            Install via symlink (default)
-  --copy               Install via copy
-  --dir <skills-parent>  Install into this directory (it will contain ralphie-skill/)
-  --no-color           Disable ANSI colors
-  -h, --help           Show help
+  --symlink               Install via symlink (default)
+  --copy                  Install via copy
+  --dir <skills-parent>   Install into this directory (it will contain ralphie-skill/)
+  --offer-bump-concurrency
+                          If maxConcurrent < 2, prompt to bump to 2 (requires interactive + openclaw CLI)
+  --no-color              Disable ANSI colors
+  -h, --help              Show help
 
 Environment overrides:
   OPENCLAW_SKILLS_PARENT=<dir>  Same as --dir
@@ -78,6 +82,7 @@ while [ $# -gt 0 ]; do
     --symlink) INSTALL_MODE="symlink"; shift ;;
     --copy) INSTALL_MODE="copy"; shift ;;
     --dir) TARGET_PARENT="$2"; shift 2 ;;
+    --offer-bump-concurrency) OFFER_BUMP_CONCURRENCY=true; shift ;;
     --no-color) shift ;;
     -h|--help) usage; exit 0 ;;
     *) log_err "Unknown arg: $1" ;;
@@ -202,13 +207,53 @@ verify_openclaw_sees_skill() {
   return 0
 }
 
+is_interactive() {
+  [ -t 0 ] && [ -t 1 ]
+}
+
 check_concurrency_budget() {
-  if [ -f "$REPO_ROOT/scripts/openclaw_concurrency_check.sh" ]; then
-    if ! bash "$REPO_ROOT/scripts/openclaw_concurrency_check.sh"; then
-      log_warn "Concurrency rail: Ralphie babysitting typically wants 1 extra concurrent agent."
-      log_warn "If you agree, follow the printed command to bump agents.defaults.maxConcurrent."
-    fi
+  if [ ! -f "$REPO_ROOT/scripts/openclaw_concurrency_check.sh" ]; then
+    return 0
   fi
+
+  if bash "$REPO_ROOT/scripts/openclaw_concurrency_check.sh"; then
+    return 0
+  fi
+
+  log_warn "Concurrency rail: Ralphie babysitting typically wants 1 extra concurrent agent."
+
+  if [ "$OFFER_BUMP_CONCURRENCY" != true ]; then
+    log_warn "Re-run with --offer-bump-concurrency to prompt for bumping maxConcurrent to 2."
+    return 0
+  fi
+
+  if ! is_interactive; then
+    log_warn "--offer-bump-concurrency requested, but this run is non-interactive; not changing config."
+    return 0
+  fi
+
+  if ! command -v openclaw >/dev/null 2>&1; then
+    log_warn "openclaw CLI not found; cannot bump concurrency automatically."
+    return 0
+  fi
+
+  echo ""
+  echo "Ralphie babysitting wants >= 2 concurrent agent runs (primary + liaison)."
+  echo "Bump OpenClaw agents.defaults.maxConcurrent to 2? [y/N] "
+  read -r answer
+  case "${answer:-N}" in
+    y|Y|yes|YES)
+      if openclaw config set agents.defaults.maxConcurrent 2 --json >/dev/null 2>&1; then
+        log_ok "Updated: agents.defaults.maxConcurrent=2"
+      else
+        log_warn "Failed to update config via openclaw config set. You can run manually:"
+        log_warn "  openclaw config set agents.defaults.maxConcurrent 2 --json"
+      fi
+      ;;
+    *)
+      log_warn "Skipped bump; leaving maxConcurrent unchanged."
+      ;;
+  esac
 }
 
 verify_openclaw_sees_skill

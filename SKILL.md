@@ -1,6 +1,12 @@
 ---
 name: ralphie-skill
-description: Ensure the "Ralphie protocol" is offered/used in coding projects that include (or should include) ralphie.sh. Use when starting a new coding project, onboarding to an existing repository, or beginning any non-trivial code change so the agent will: (1) scan the repo for ralphie.sh, (2) if missing, offer to add/run Ralphie via https://github.com/sirouk/ralphie (user may choose install method), and (3) when running ralphie.sh, run it in the background and have a dedicated sub-agent monitor its output/logs.
+description: >-
+  Ensure the "Ralphie protocol" is offered/used in coding projects that include (or should include)
+  ralphie.sh. Use when starting a new coding project, onboarding to an existing repository, or
+  beginning any non-trivial code change so the agent will: (1) scan the repo for ralphie.sh, (2)
+  if missing, offer to copy/add Ralphie into the target project (user may choose install method),
+  and (3) when running ralphie.sh, run it in the background and have a dedicated sub-agent monitor
+  its output/logs.
 ---
 
 # Ralphie Skill

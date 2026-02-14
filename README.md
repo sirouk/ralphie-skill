@@ -30,6 +30,14 @@ bash scripts/bootstrap_openclaw.sh
 
 By default this installs via **symlink** into your OpenClaw workspace’s `skills/` directory (auto-detected from `~/.openclaw/openclaw.json`).
 
+If you want the installer to also check whether OpenClaw allows running a babysitter/liaison agent (recommended), use:
+
+```bash
+bash scripts/bootstrap_openclaw.sh --offer-bump-concurrency
+```
+
+If `agents.defaults.maxConcurrent < 2`, it will prompt you to bump it to 2.
+
 Useful flags:
 
 ```bash
