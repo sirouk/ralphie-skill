@@ -2,6 +2,38 @@
 
 OpenClaw skill that makes the agent a **Ralphie liaison** for coding projects.
 
+## Quick Start
+
+1. Install the skill into OpenClaw (so agents can follow it):
+
+```bash
+bash scripts/bootstrap_openclaw.sh --offer-bump-concurrency
+```
+
+2. In any target project you want to Ralphie-enable, add `ralphie.sh`:
+
+Preferred (copy the vendored script into the project):
+
+```bash
+bash /path/to/ralphie-skill/scripts/ralphie_copy.sh --to /path/to/your/project
+```
+
+Alternative (download upstream into the project):
+
+```bash
+cd /path/to/your/project
+bash /path/to/ralphie-skill/scripts/ralphie_install.sh ./ralphie.sh
+```
+
+3. Run Ralphie in the target project, in the background (non-blocking):
+
+```bash
+cd /path/to/your/project
+bash /path/to/ralphie-skill/scripts/ralphie_run_bg.sh ./ralphie.sh
+```
+
+Full agent workflow and liaison behavior: `SKILL.md`.
+
 When starting work in a repo (new or existing), the skill guides the agent to:
 - scan for `ralphie.sh`
 - offer to **copy** it into the target project if missing (or download upstream)
