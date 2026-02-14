@@ -7,7 +7,7 @@ OpenClaw skill that makes the agent a **Ralphie liaison** for coding projects.
 1. Install the skill into OpenClaw (so agents can follow it):
 
 ```bash
-bash scripts/bootstrap_openclaw.sh --offer-bump-concurrency
+bash scripts/bootstrap_ralphie.sh --offer-bump-concurrency
 ```
 
 2. In any target project you want to Ralphie-enable, add `ralphie.sh`:
@@ -45,7 +45,7 @@ When starting work in a repo (new or existing), the skill guides the agent to:
 
 - `SKILL.md` — the skill instructions OpenClaw loads
 - `scripts/ralphie.sh` — vendored upstream copy (for inspection/reference)
-- `scripts/bootstrap_openclaw.sh` — installs this repo as an OpenClaw skill (symlink or copy)
+- `scripts/bootstrap_ralphie.sh` — installs this repo as an OpenClaw skill (symlink or copy)
 - `scripts/ralphie_scan.sh` / `scripts/ralphie_copy.sh` / `scripts/ralphie_install.sh` / `scripts/ralphie_run_bg.sh` — helper scripts
 - `references/ralphie_protocol.md` — protocol framing
 - `references/ralphie_prompts.md` — prompt-by-prompt liaison guide + implications
@@ -57,7 +57,7 @@ When starting work in a repo (new or existing), the skill guides the agent to:
 From the repo root:
 
 ```bash
-bash scripts/bootstrap_openclaw.sh
+bash scripts/bootstrap_ralphie.sh
 ```
 
 By default this installs via **symlink** into your OpenClaw workspace’s `skills/` directory (auto-detected from `~/.openclaw/openclaw.json`).
@@ -65,7 +65,7 @@ By default this installs via **symlink** into your OpenClaw workspace’s `skill
 If you want the installer to also check whether OpenClaw allows running a babysitter/liaison agent (recommended), use:
 
 ```bash
-bash scripts/bootstrap_openclaw.sh --offer-bump-concurrency
+bash scripts/bootstrap_ralphie.sh --offer-bump-concurrency
 ```
 
 If `agents.defaults.maxConcurrent < 2`, it will prompt you to bump it to 2.
@@ -73,8 +73,8 @@ If `agents.defaults.maxConcurrent < 2`, it will prompt you to bump it to 2.
 Useful flags:
 
 ```bash
-bash scripts/bootstrap_openclaw.sh --copy
-bash scripts/bootstrap_openclaw.sh --dir ~/.openclaw/skills
+bash scripts/bootstrap_ralphie.sh --copy
+bash scripts/bootstrap_ralphie.sh --dir ~/.openclaw/skills
 ```
 
 The script also attempts to verify discovery via:

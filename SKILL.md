@@ -131,6 +131,6 @@ If Codex auth is OAuth-based in your OpenClaw setup, prefer the OpenClaw CLI log
 - `scripts/ralphie_install.sh` — download `ralphie.sh` into a target project
 - `scripts/ralphie_run_bg.sh` — run `ralphie.sh` in background with pid+log
 - `scripts/ralphie.sh` — **vendored upstream copy** (large) for inspection/reference; upstream URL is still the source of truth
-- `scripts/bootstrap_openclaw.sh` — install this skill repo into an OpenClaw skills directory (symlink/copy)
+- `scripts/bootstrap_ralphie.sh` — install this skill repo into an OpenClaw skills directory (symlink/copy)
 - `references/ralphie_protocol.md` — human/agent-facing “Ralphie protocol” framing
 - `references/ralphie_prompts.md` — prompt-by-prompt liaison guide + safe defaults
